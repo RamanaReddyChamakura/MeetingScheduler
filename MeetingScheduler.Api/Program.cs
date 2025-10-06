@@ -72,14 +72,12 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 
-    // Seed rooms from Graph Places if empty and we can acquire a token (requires first user login to cache token)
-    if (!db.Rooms.Any())
+    // Optional: Seed rooms from Graph Places if enabled
+    if (config.GetValue<bool>("Graph:SeedRoomsOnStartup") && !db.Rooms.Any())
     {
         try
         {
             var graph = scope.ServiceProvider.GetRequiredService<IGraphService>();
-            // Note: for delegated OBO, tokens require a signed-in user context.
-            // This startup seed will be a no-op until the first authenticated call is made which creates a user token cache.
             var rooms = await graph.GetRoomsFromGraphAsync(CancellationToken.None);
             foreach (var r in rooms)
             {
@@ -92,7 +90,7 @@ using (var scope = app.Services.CreateScope())
         }
         catch
         {
-            // Ignore failures at startup; admin can trigger seed via API later
+            // ignore failures at startup; admin can trigger seed via API later
         }
     }
 }

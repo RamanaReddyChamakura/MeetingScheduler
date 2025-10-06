@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json.schemastore.org/angular-cli",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "meeting-scheduler-client": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/meeting-scheduler-client",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "css",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.css"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "2MB", "maximumError": "5MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "2KB", "maximumError": "8KB" }
+              ],
+              "outputHashing": "all"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "meeting-scheduler-client:build",
+            "proxyConfig": "proxy.conf.json"
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "meeting-scheduler-client:build:production"
+            }
+          }
+        }
+      }
+    }
+  }
+}

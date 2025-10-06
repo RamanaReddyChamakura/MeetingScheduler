@@ -1,11 +1,10 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { MsalGuardConfiguration, MsalInterceptor, MsalInterceptorConfiguration, MsalModule, MsalService, MSAL_GUARD_CONFIG, MSAL_INSTANCE, MSAL_INTERCEPTOR_CONFIG } from '@azure/msal-angular';
 import { IPublicClientApplication, InteractionType, PublicClientApplication } from '@azure/msal-browser';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 
 const clientId = 'YOUR_SPA_CLIENT_ID';
 const tenantId = 'YOUR_TENANT_ID';
-const apiBase = 'https://localhost:5001';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
@@ -24,8 +23,8 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string>>();
-  protectedResourceMap.set(`${apiBase}/api/`, ['api://YOUR_API_APP_ID_URI/user_impersonation']);
-  protectedResourceMap.set('https://graph.microsoft.com/v1.0/', ['User.Read', 'Calendars.Read', 'Calendars.ReadWrite']);
+  protectedResourceMap.set(`/api/`, ['api://YOUR_API_APP_ID_URI/user_impersonation']);
+  protectedResourceMap.set('https://graph.microsoft.com/v1.0/', ['User.Read', 'Calendars.Read', 'Calendars.ReadWrite', 'Places.Read.All']);
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap
@@ -41,7 +40,7 @@ export const msalProviders: ApplicationConfig['providers'] = [
   MsalService
 ];
 
-export function authInterceptor(req: any, next: any) {
-  // MsalInterceptor handles token injection; just pass through.
+export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
+  // MsalInterceptor attaches tokens automatically for protectedResourceMap; pass-through.
   return next(req);
 }
