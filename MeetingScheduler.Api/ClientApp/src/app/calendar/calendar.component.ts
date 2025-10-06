@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { CalendarEvent, CalendarModule, CalendarView } from 'angular-calendar';
+import { CalendarEvent, CalendarModule, CalendarView, DateAdapter } from 'angular-calendar';
 import { FormsModule } from '@angular/forms';
+import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
   imports: [CommonModule, CalendarModule, FormsModule],
+  providers: [{ provide: DateAdapter, useFactory: adapterFactory }],
   template: `
   <div class="container">
     <div class="sidebar">
@@ -57,7 +59,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class CalendarComponent implements OnInit {
   CalendarView = CalendarView;
-  apiBase = 'https://localhost:5001';
+  apiBase = '';
   rooms: any[] = [];
   selectedRoom: any | null = null;
   view: CalendarView = CalendarView.Week;
@@ -78,7 +80,7 @@ export class CalendarComponent implements OnInit {
   }
 
   refresh(){
-    this.http.get<any[]>(`${this.apiBase}/api/rooms`).subscribe(r=> this.rooms = r);
+    this.http.get<any[]>(`/api/rooms`).subscribe(r=> this.rooms = r);
     this.loadAvailability();
   }
 
@@ -91,7 +93,7 @@ export class CalendarComponent implements OnInit {
     if (this.view === CalendarView.Week) { start.setDate(start.getDate() - start.getDay()); end.setDate(start.getDate()+6); }
     if (this.view === CalendarView.Month) { start.setDate(1); end.setMonth(start.getMonth()+1); end.setDate(0); }
     const qs = `?start=${start.toISOString()}&end=${end.toISOString()}&interval=30`;
-    this.http.get<any>(`${this.apiBase}/api/availability/rooms/${encodeURIComponent(this.selectedRoom.email)}${qs}`).subscribe(r=> this.availabilityView = r.availabilityView);
+    this.http.get<any>(`/api/availability/rooms/${encodeURIComponent(this.selectedRoom.email)}${qs}`).subscribe(r=> this.availabilityView = r.availabilityView);
   }
 
   previous(){
@@ -119,7 +121,7 @@ export class CalendarComponent implements OnInit {
       roomId: this.selectedRoom?.id,
       timeZoneId: this.timeZoneId
     };
-    this.http.post<{id:string}>(`${this.apiBase}/api/meetings`, req).subscribe({
+    this.http.post<{id:string}>(`/api/meetings`, req).subscribe({
       next: _ => alert('Scheduled'),
       error: err => this.error = err?.error?.error || 'Failed'
     });
