@@ -3,15 +3,15 @@ import { MsalGuardConfiguration, MsalInterceptor, MsalInterceptorConfiguration, 
 import { IPublicClientApplication, InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { HTTP_INTERCEPTORS, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 
-const clientId = 'YOUR_SPA_CLIENT_ID';
-const tenantId = 'YOUR_TENANT_ID';
+const clientId = 'e675a906-a13b-4e3d-b053-3fff5fed0d8d'; // Replace with your Azure AD app client ID
+const tenantId = '3ca8ff7d-acda-4f42-b8d5-a4f587df7101';
 
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({
     auth: {
       clientId,
       authority: `https://login.microsoftonline.com/${tenantId}`,
-      redirectUri: 'http://localhost:4200'
+      redirectUri: window.location.origin
     },
     cache: { cacheLocation: 'localStorage' }
   });
@@ -23,7 +23,9 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string>>();
-  protectedResourceMap.set(`/api/`, ['api://YOUR_API_APP_ID_URI/user_impersonation']);
+  // Attach tokens for both relative and absolute API calls during dev
+  protectedResourceMap.set('/api', [`api://${clientId}/.default`]);
+  protectedResourceMap.set('https://localhost:44344/api', [`api://${clientId}/.default`]);
   protectedResourceMap.set('https://graph.microsoft.com/v1.0/', ['User.Read', 'Calendars.Read', 'Calendars.ReadWrite', 'Places.Read.All']);
   return {
     interactionType: InteractionType.Redirect,

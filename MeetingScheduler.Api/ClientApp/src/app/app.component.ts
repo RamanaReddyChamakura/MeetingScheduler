@@ -1,21 +1,28 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <header class="toolbar">
-      <span>Meeting Scheduler</span>
+      <span class="brand">Meeting Scheduler</span>
+      <nav class="nav">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        <a routerLink="/admin/rooms" routerLinkActive="active">Rooms</a>
+        <a routerLink="/admin/users" routerLinkActive="active">Admins</a>
+      </nav>
       <span class="spacer"></span>
-      <button (click)="login()">Login</button>
-      <button (click)="logout()">Logout</button>
+      <button class="btn" (click)="login()">Sign in</button>
+      <button class="btn" (click)="logout()">Sign out</button>
     </header>
-    <router-outlet></router-outlet>
+    <main class="page">
+      <router-outlet></router-outlet>
+    </main>
   `,
-  styles: [`.toolbar{display:flex;gap:1rem;align-items:center;padding:8px;border-bottom:1px solid #ddd}.spacer{flex:1}`]
+  styles: []
 })
 export class AppComponent {
   constructor(private msal: MsalService) {}

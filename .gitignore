@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/MeetingScheduler.Api/ClientApp/.angular/cache/20.3.4/meeting-scheduler-client/angular-compiler.db
+/MeetingScheduler.Api/ClientApp/.angular/cache/20.3.4/meeting-scheduler-client/.tsbuildinfo
+/MeetingScheduler.Api/ClientApp/dist/meeting-scheduler-client

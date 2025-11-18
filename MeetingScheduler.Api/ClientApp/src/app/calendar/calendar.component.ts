@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { CalendarEvent, CalendarModule, CalendarView, DateAdapter } from 'angular-calendar';
+import { CalendarEvent, CalendarModule, CalendarView } from 'angular-calendar';
 import { FormsModule } from '@angular/forms';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
@@ -9,53 +9,85 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
   selector: 'app-calendar',
   standalone: true,
   imports: [CommonModule, CalendarModule, FormsModule],
-  providers: [{ provide: DateAdapter, useFactory: adapterFactory }],
   template: `
-  <div class="container">
-    <div class="sidebar">
+  <div class="grid two">
+    <aside class="sidebar">
       <h3>Rooms</h3>
-      <ul>
-        <li *ngFor="let r of rooms" (click)="selectRoom(r)" [class.sel]="r.id===selectedRoom?.id">{{r.name}} ({{r.capacity}})</li>
+      <ul class="list rooms">
+        <li *ngFor="let r of rooms" (click)="selectRoom(r)" [class.sel]="r.id===selectedRoom?.id">
+          <div>
+            <div>{{r.name}}</div>
+            <div class="meta">{{r.email}} • {{r.capacity}} seats</div>
+          </div>
+        </li>
       </ul>
-      <button (click)="refresh()">Refresh</button>
-    </div>
-    <div class="main">
-      <div class="toolbar">
-        <button (click)="previous()">Prev</button>
-        <select [(ngModel)]="view">
-          <option [ngValue]="CalendarView.Day">Day</option>
-          <option [ngValue]="CalendarView.Week">Week</option>
-          <option [ngValue]="CalendarView.Month">Month</option>
-        </select>
-        <span>{{viewDate | date:'fullDate'}}</span>
-        <button (click)="next()">Next</button>
+      <div style="margin-top:10px">
+        <button class="btn" (click)="refresh()">Refresh</button>
       </div>
-      <mwl-calendar-week-view *ngIf="view===CalendarView.Week" [viewDate]="viewDate" [events]="events"></mwl-calendar-week-view>
-      <mwl-calendar-month-view *ngIf="view===CalendarView.Month" [viewDate]="viewDate" [events]="events"></mwl-calendar-month-view>
-      <mwl-calendar-day-view *ngIf="view===CalendarView.Day" [viewDate]="viewDate" [events]="events"></mwl-calendar-day-view>
+    </aside>
+    <section class="card">
+      <div class="card-body">
+        <div class="calendar-toolbar">
+          <button class="btn" (click)="previous()">Prev</button>
+          <select [(ngModel)]="view" class="input" style="width:auto">
+            <option [ngValue]="CalendarView.Day">Day</option>
+            <option [ngValue]="CalendarView.Week">Week</option>
+            <option [ngValue]="CalendarView.Month">Month</option>
+          </select>
+          <span style="flex:1"></span>
+          <strong>{{viewDate | date:'fullDate'}}</strong>
+          <button class="btn" (click)="next()">Next</button>
+        </div>
 
-      <div class="create">
-        <input placeholder="Subject" [(ngModel)]="subject"/>
-        <input type="datetime-local" [(ngModel)]="startStr"/>
-        <input type="datetime-local" [(ngModel)]="endStr"/>
-        <input placeholder="Attendees comma separated" [(ngModel)]="attendees"/>
-        <select [(ngModel)]="timeZoneId">
-          <option value="UTC">UTC</option>
-          <option value="America/Los_Angeles">America/Los_Angeles</option>
-          <option value="America/New_York">America/New_York</option>
-          <option value="Europe/London">Europe/London</option>
-          <option value="Asia/Kolkata">Asia/Kolkata</option>
-        </select>
-        <button (click)="schedule()" [disabled]="!selectedRoom">Schedule</button>
+        <mwl-calendar-week-view *ngIf="view===CalendarView.Week" [viewDate]="viewDate" [events]="events"></mwl-calendar-week-view>
+        <mwl-calendar-month-view *ngIf="view===CalendarView.Month" [viewDate]="viewDate" [events]="events"></mwl-calendar-month-view>
+        <mwl-calendar-day-view *ngIf="view===CalendarView.Day" [viewDate]="viewDate" [events]="events"></mwl-calendar-day-view>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-header">Schedule a meeting</div>
+          <div class="card-body">
+            <div class="form">
+              <div>
+                <label>Subject</label>
+                <input class="input" placeholder="e.g. Project kickoff" [(ngModel)]="subject"/>
+              </div>
+              <div class="row">
+                <div>
+                  <label>Start</label>
+                  <input class="input" type="datetime-local" [(ngModel)]="startStr"/>
+                </div>
+                <div>
+                  <label>End</label>
+                  <input class="input" type="datetime-local" [(ngModel)]="endStr"/>
+                </div>
+              </div>
+              <div>
+                <label>Attendees</label>
+                <input class="input" placeholder="user1@org.com, user2@org.com" [(ngModel)]="attendees"/>
+              </div>
+              <div>
+                <label>Time zone</label>
+                <select class="input" [(ngModel)]="timeZoneId">
+                  <option value="UTC">UTC</option>
+                  <option value="America/Los_Angeles">America/Los_Angeles</option>
+                  <option value="America/New_York">America/New_York</option>
+                  <option value="Europe/London">Europe/London</option>
+                  <option value="Asia/Kolkata">Asia/Kolkata</option>
+                </select>
+              </div>
+              <div>
+                <button class="btn primary" (click)="schedule()" [disabled]="!selectedRoom">Schedule</button>
+              </div>
+              <div *ngIf="availabilityView" class="availability"><strong>Availability</strong>\n{{availabilityView}}</div>
+              <div *ngIf="error" class="error">{{error}}</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div *ngIf="availabilityView">Availability: {{availabilityView}}</div>
-      <div *ngIf="error" class="error">{{error}}</div>
-    </div>
+    </section>
   </div>
   `,
-  styles: [
-    `.container{display:flex;gap:12px}.sidebar{width:240px;border-right:1px solid #eee;padding-right:12px}.main{flex:1}.sel{font-weight:600}.toolbar{display:flex;gap:1rem;align-items:center}`
-  ]
+  styles: []
 })
 export class CalendarComponent implements OnInit {
   CalendarView = CalendarView;
